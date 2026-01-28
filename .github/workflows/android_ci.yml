@@ -1,0 +1,35 @@
+name: Run test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4 # Action to check out your code
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3 # Action to set up the Java environment
+      with:
+        java-version: '21'
+        distribution: 'zulu'
+        cache: 'gradle' # Caches Gradle dependencies to speed up builds
+
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew # Ensure the Gradle wrapper script is executable
+
+    - name: Build debug APK
+      run: ./gradlew assembleDebug # Run the Gradle task to build the APK
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4 # Action to save the built APK as an artifact
+      with:
+        name: app-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
