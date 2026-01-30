@@ -34,6 +34,21 @@ jobs:
         name: app-debug-apk
         path: app/build/outputs/apk/debug/app-debug.apk
 
+    - name: Generate version info
+      id: version
+      run: |
+        VERSION_CODE=$(date +%s)
+        VERSION_NAME="${{ github.event.inputs.buildType }}-${{ github.ref_name }}-$(date +%Y%m%d)"
+        echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+        echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+        echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+        echo "versionName=$VERSION_NAME" >> $GITHUB_OUTPUT      
+
+    - name: Build debug APK
+      run: |
+        ./gradlew assembleDebug\
+        -PversionCode=$VERSION_CODE \
+
     - name: Send Debug APK to Telegram
       run: |
             MESSAGE="✅APK successfully uploaded to Firebase!\n\n 📦  Alif Mobi ($VERSION_CODE)\nn  🔀Task: ${{ github.event.pull_request.head.ref }} \`\n✍️Link: ${{ github.event.head_commit.message }}
