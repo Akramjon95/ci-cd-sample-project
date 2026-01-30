@@ -26,25 +26,6 @@ jobs:
       run: chmod +x ./gradlew # Ensure the Gradle wrapper script is executable
 
     - name: Build debug APK
-      run: ./gradlew assembleDebug # Run the Gradle task to build the APK
-
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4 # Action to save the built APK as an artifact
-      with:
-        name: app-debug-apk
-        path: app/build/outputs/apk/debug/app-debug.apk
-
-    - name: Generate version info
-      id: version
-      run: |
-        VERSION_CODE=$(date +%s)
-        VERSION_NAME="${{ github.event.inputs.buildType }}-${{ github.ref_name }}-$(date +%Y%m%d)"
-        echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-        echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
-        echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
-        echo "versionName=$VERSION_NAME" >> $GITHUB_OUTPUT      
-
-    - name: Build debug APK
       run: |
         ./gradlew assembleDebug\
         -PversionCode=$VERSION_CODE \
