@@ -27,8 +27,7 @@ jobs:
 
     - name: Build debug APK
       run: |
-        ./gradlew assembleDebug\
-        -PversionCode=$VERSION_CODE \
+        ./gradlew assembleDebug
 
     - name: Send Debug APK to Telegram
       run: |

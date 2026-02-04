@@ -1,0 +1,44 @@
+name: Android Debug Build & Telegram Send
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+          cache: 'gradle'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Find the debug APK file
+        id: find_apk
+        run: echo "APK_PATH=$(find app/build/outputs/apk/debug/ -name "*.apk" | head -n 1)" >> $GITHUB_OUTPUT
+        # This step finds the path of the generated APK and sets it as an output variable
+
+      - name: Send the APK to Telegram
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug
+          path: ${{ steps.find_apk.outputs.APK_PATH }}
+
+      - name: Send APK to Telegram Channel
+        run: |
+          curl -F chat_id=${{ secrets.CHAT_ID }} -F document=@"${{ steps.find_apk.outputs.APK_PATH }}" -F caption="Build: ${{ github.sha }} on $(date +'%Y-%m-%d %H:%M')" https://api.telegram.org/bot${{ secrets.BOT_API_KEY }}/sendDocument
+        # This cURL command sends the file using the Telegram Bot API endpoint
