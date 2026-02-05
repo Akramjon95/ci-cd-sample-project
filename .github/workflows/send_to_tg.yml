@@ -40,5 +40,5 @@ jobs:
 
       - name: Send APK to Telegram Channel
         run: |
-          curl -F chat_id=${{ secrets.CHAT_ID }} -F document=@"${{ steps.find_apk.outputs.APK_PATH }}" -F caption="Build: ${{ github.sha }} on $(date +'%Y-%m-%d %H:%M')" https://api.telegram.org/bot${{ secrets.BOT_API_KEY }}/sendDocument
+          curl -F chat_id=${{ secrets.$TELEGRAM_CHAT_ID }} -F document=@"${{ steps.find_apk.outputs.APK_PATH }}" -F caption="Build: ${{ github.sha }} on $(date +'%Y-%m-%d %H:%M')" https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
         # This cURL command sends the file using the Telegram Bot API endpoint
