@@ -45,7 +45,7 @@ jobs:
         COMMIT_MSG=$(git log -1 --pretty=%B)
         
         curl -v \
-              -F "chat_id=$TELEGRAM_CHAT_ID" \
+              -F "chat_id={{ secrets.TELEGRAM_CHAT_ID }}" \
              -F "document=@$APK_PATH" \
              -F "caption=🚀 *New Build Ready!*%0A%0A*Commit:* $COMMIT_MSG%0A*Branch:* ${{ github.ref_name }}" \
              -F "parse_mode=Markdown" \
