@@ -25,20 +25,39 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
-
-      - name: Find the debug APK file
-        id: find_apk
-        run: echo "APK_PATH=$(find app/build/outputs/apk/debug/ -name "*.apk" | head -n 1)" >> $GITHUB_OUTPUT
-        # This step finds the path of the generated APK and sets it as an output variable
-
-      - name: Send the APK to Telegram
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-debug
-          path: ${{ steps.find_apk.outputs.APK_PATH }}
-
-      - name: Send APK to Telegram Channel
         run: |
-          curl -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -F document=@"${{ steps.find_apk.outputs.APK_PATH }}" -F caption="Build: ${{ github.sha }} on $(date +'%Y-%m-%d %H:%M')" https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      - name: Send APK to Telegram
+        uses: actions/upload-artifact@v3
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          run: |
+            APK_PATH="app/build/outputs/apk/debug/app-debug.apk" # Adjust path as needed
+            CAPTION="*New Build Available:*
+            *Project:* ${{ github.event.repository.name }}
+            *Branch:* ${{ github.ref }}
+            *Commit Message:* ${{ github.event.head_commit.message }}"
+            
+            # Use curl to upload the document to Telegram
+            curl -v -F chat_id=$TELEGRAM_CHAT_ID \
+                 -F document=@"$APK_PATH" \
+                 -F caption="$CAPTION" \
+                 -F parse_mode="Markdown" \
+                 https://api.telegram.org
+          #run: echo "APK_PATH=$(find app/build/outputs/apk/debug/ -name "*.apk" | head -n 1)" >> $GITHUB_OUTPUT
+          # This step finds the path of the generated APK and sets it as an output variable
+
+          #- name: Send the APK to Telegram
+          #uses: actions/upload-artifact@v3
+          #with:
+          # name: app-debug
+          #path: ${{ steps.find_apk.outputs.APK_PATH }}
+
+          #- name: Send APK to Telegram Channel
+          #run: |
+          # curl -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} -F document=@"${{ steps.find_apk.outputs.APK_PATH }}" -F caption="Build: ${{ github.sha }} on $(date +'%Y-%m-%d %H:%M')" https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
+
         # This cURL command sends the file using the Telegram Bot API endpoint
